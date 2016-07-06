@@ -1,13 +1,15 @@
+#! /usr/bin/env python2
+
 from random import randint
 from random import choice
 """
 VYLEPSENIA:
 1.) simulacia hraca s dvoma rukami. Hrac moze niest ziadnu, jednu jednorucnu,
-dve jednorucne alebo jednu obojrucnu zbran. V hre su aj stity, brane ako jednorucne zbrane. 
-    -> pridana metoda Player.equip(self, hand, weapon)     
+dve jednorucne alebo jednu obojrucnu zbran. V hre su aj stity, brane ako jednorucne zbrane.
+    -> pridana metoda Player.equip(self, hand, weapon)
     -> zmena suboja (utok a obrana sa pocitaju z oboch ruk)
     -> definovany predmet ruka =  Weapon(...)
-2.) upraveny vyber cennych predmetov, zbrani a priser, aby hra bola hratelnejsia -> celkom hardcore ked hrac nema stastie, chcelo by to progresivne zvysovanie urovne priser 
+2.) upraveny vyber cennych predmetov, zbrani a priser, aby hra bola hratelnejsia -> celkom hardcore ked hrac nema stastie, chcelo by to progresivne zvysovanie urovne priser
 3.) zavedena minimalna pauza medzi odpocinkami:
     premenna can_rest sa po kazdom odpocinku nastavi na 10, zmensuje sa kazdou platnou akciou hraca(-1 za "vezmi", "poloz", "vyzbroj", -3 za "jdi")
     odpocinok povoleny ked can_rest <= 0
@@ -44,7 +46,7 @@ class Weapon(object):
             print "Obourucna zbran."
         else:
             print "Jednorucna zbran."
-    
+
 
 
 items = [ # name, description, value, weight
@@ -102,7 +104,7 @@ class Player(object):
         self.max_health = randint(150,200)
         self.health = self.max_health
         self.capacity = randint(150,200)
-        self.left_hand = ruka       
+        self.left_hand = ruka
         self.right_hand = weapons[3]
         self.bag = {}
     def rest(self):
@@ -121,13 +123,13 @@ class Player(object):
             print "Predmet \"" + item.name + "\" vlozen do batohu."
             self.bag[item.name] = Item(item.name, item.description, item.value, item.weight)
             self.capacity -= item.weight
-            return True 
+            return True
     def equip(self, hand, weapon = ruka):         #input weapon ako object, moznost unequip nezadanim zbrane; vrati zoznam objektov
         previous_weapons = []
         if weapon.is_twohanded == False:                #prikaz equip jednorucnu zbran
             if self.right_hand.is_twohanded == True:    #prave equipnuta zbran je obojrucna
                 if hand == "prava":
-                    self.left_hand = ruka     
+                    self.left_hand = ruka
                     previous_weapons.append(self.right_hand)
                     self.right_hand = weapon
                 else:
@@ -135,18 +137,18 @@ class Player(object):
                     previous_weapons.append(self.left_hand)
                     self.left_hand = weapon
             elif hand == "leva":                    #equipujem jednorucnu zbran ked bola equipnuta jednorucna
-                if self.left_hand == ruka:   
+                if self.left_hand == ruka:
                     self.left_hand = weapon
-                else:   
-                    previous_weapons.append(self.left_hand) 
-                    self.left_hand = weapon                 
+                else:
+                    previous_weapons.append(self.left_hand)
+                    self.left_hand = weapon
             elif hand == "prava":
                 if self.right_hand == ruka:
                     self.right_hand = weapon
                 else:
                     previous_weapons.append(self.right_hand)
                     self.right_hand = weapon
-        elif weapon.is_twohanded == True:                   #vrati dva objekty v zozname 
+        elif weapon.is_twohanded == True:                   #vrati dva objekty v zozname
             if self.left_hand == ruka != self.right_hand:
                 previous_weapons.append(self.right_hand)
             elif self.right_hand == ruka != self.left_hand:
@@ -156,8 +158,8 @@ class Player(object):
                 previous_weapons.append(self.left_hand)
             self.left_hand = weapon
             self.right_hand = weapon
-        return previous_weapons                
-                
+        return previous_weapons
+
     def take_from_bag(self, item_name):     #input string
         if item_name in self.bag:
             vec = self.bag[item_name]
@@ -183,7 +185,7 @@ class Player(object):
         self.left_hand.describe()
         print "Prava ruka:",
         self.right_hand.describe()
-        
+
     def score(self):
         skore = 0
         for vec in self.bag:
@@ -202,7 +204,7 @@ def attack_player(player, monster):
     if monster.health <= 0:
         print "Protivnik je porazen!"
         return True
-    
+
 def attack_monster(player, monster):
     print "Protivnik \"" + monster.name + "\" na tebe utoci."
     damage = int((randint(8,12)*0.1) * monster.attack) - (player.left_hand.defence + player.right_hand.defence)
@@ -225,17 +227,17 @@ def fight(player, monster):
             result = attack_player(player, monster)
             if monster.health <=0:
                 break
-            print 
+            print
             result = attack_monster(player, monster)
-            print 
+            print
     else:                                               #monster starts
         while monster.health > 0 and player.health > 0:
             result = attack_monster(player, monster)
             if player.health <= 0:
                break
-            print 
+            print
             result = attack_player(player, monster)
-            print 
+            print
     return result
 
 class Room(object):
@@ -273,7 +275,7 @@ class Room(object):
             print "- ", d
         if self.monster != None:
             self.monster.react_to_noise()
-            if  self.monster.sleeping == True:    
+            if  self.monster.sleeping == True:
                 print "V mistnosti je " + self.monster.name + ". Spi."
                 return True
             else:
@@ -385,12 +387,12 @@ rooms[14].add_direction("dolu", rooms[9])
 rooms[15].add_direction("dolu", tomb)
 
 
- 
-def randomize(rooms, monsters, items, weapons):         
+
+def randomize(rooms, monsters, items, weapons):
     for mistnost in rooms:
         seed = [randint(1,4), randint(0,2), randint(1,3)]
         if seed[0] != 1: mistnost.set_monster(choice(monsters)) #75% sanca na priseru v miestnosti
-        for i in range (seed[1]): mistnost.add_item(choice(items))  #0-2 predmety v miestnosti; vyzera byt bugle, stretla som aj 4 itemy  
+        for i in range (seed[1]): mistnost.add_item(choice(items))  #0-2 predmety v miestnosti; vyzera byt bugle, stretla som aj 4 itemy
         if seed[2] == 1: mistnost.add_weapon(choice(weapons))   #33% sanca na zbran v miestnosti
 
 def play(start = start):
@@ -423,17 +425,17 @@ def play(start = start):
         prikaz = str(raw_input("Zadej prikaz: "))
         while len(prikaz) == 0:
             prikaz = str(raw_input("Zadej prikaz: "))
-        prikaz = prikaz.lower() 
+        prikaz = prikaz.lower()
         prikaz = prikaz.split()
-        while prikaz[0] not in ["info", "jdi", "vezmi", "vyzbroj", "odpocinek", "poloz", "konec", "napoveda"]:     
+        while prikaz[0] not in ["info", "jdi", "vezmi", "vyzbroj", "odpocinek", "poloz", "konec", "napoveda"]:
             print "Nepodporovany vstup.",
             prikaz = str(raw_input("Zadej prikaz: "))
             prikaz = prikaz.lower()
             prikaz = prikaz.split()
-        if prikaz[0] == "info":        
+        if prikaz[0] == "info":
             player.describe()
 
-        elif prikaz[0] == "jdi":        
+        elif prikaz[0] == "jdi":
             if prikaz[1] in current_room.directions:
                 if can_rest > 0:                            #uprava pocitadla umoznujuceho odpocinok
                     can_rest -= 3
@@ -443,7 +445,7 @@ def play(start = start):
                     print "--- neuspesny konec hry ---"
                     game_over = True
                 elif current_room.ending == True:
-                    max_skore = 500         #faraonova maska       
+                    max_skore = 500         #faraonova maska
                     for room in rooms:
                         for item in room.items:
                             max_skore += room.items[item].value
@@ -460,7 +462,7 @@ def play(start = start):
                 print "Zadej ruku, do ktere chces zbran vzit."
             else:
                 if len(prikaz) < 3:
-                    if can_rest > 0:                            #uprava pocitadla umoznujuceho odpocinok   
+                    if can_rest > 0:                            #uprava pocitadla umoznujuceho odpocinok
                         can_rest -= 1
                     previous_weapons = player.equip(prikaz[1])
                     if previous_weapons != []:
@@ -468,7 +470,7 @@ def play(start = start):
                             current_room.add_weapon(weapon)
                     player.describe()
                     print
-                else: 
+                else:
                     if prikaz[2] in current_room.weapons:
                         if can_rest > 0:                        #uprava pocitadla umoznujuceho odpocinok
                             can_rest -= 1
@@ -481,14 +483,14 @@ def play(start = start):
                         print
                     else:
                         print "Tato zbran v mistnosti neni."
-        
+
         elif prikaz[0] == "vezmi":
             vec = prikaz[1]
-            if vec in current_room.items:                
+            if vec in current_room.items:
                 can_take = player.add_to_bag(current_room.items[vec])
                 if can_take == True:
                     current_room.remove_item(vec)
-                    if can_rest > 0:                        #uprava pocitadla umoznujuceho odpocinok    
+                    if can_rest > 0:                        #uprava pocitadla umoznujuceho odpocinok
                         can_rest -= 1
             else:
                 print "Tento predmet se v mistnosti nenachazi."
@@ -499,7 +501,7 @@ def play(start = start):
                     added_health = player.rest()
                     print "Tvoje postava si odpocinula a nabrala " + str(added_health) + " zdravi."
                     print "Zdravi: " + str(player.health) + "/" + str(player.max_health)
-                    can_rest = 10                           #zacne odpocitavanie, kedy postava bude moct znova odpocivat 
+                    can_rest = 10                           #zacne odpocitavanie, kedy postava bude moct znova odpocivat
                 else:
                     print "Jeste se ti nechce odpocivat."
             else: print "V mistnosti s priserou nemuzes odpocivat, ty blazne!"
@@ -527,4 +529,8 @@ def play(start = start):
             print   "konec:\t\t\t ukonceni hry"
             print   "napoveda:\t\t vypise tuto napovedu"
             print
+
+if __name__ == "__main__":
+    play()
+
 
